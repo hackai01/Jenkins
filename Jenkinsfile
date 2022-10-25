@@ -1,7 +1,7 @@
 pipeline {
   environment {
-    imagename = "hackai01/Jenkins"
-    registryCredential = 'hackai01'
+    imagename = "hackai87/jenkins"
+    registryCredential = 'hackai87'
     dockerImage = ''
   }
   agent any
