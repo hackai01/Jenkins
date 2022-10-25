@@ -6,7 +6,7 @@ pipeline {
   }
   agent any
   stages {
-    stage('Cloning Git') {
+    stage('Clone Git') {
       steps {
         git ([url: 'https://github.com/hackai01/Jenkins', branch: 'main', credentialsId: 'hackai01'])
  
