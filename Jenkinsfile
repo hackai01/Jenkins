@@ -18,7 +18,13 @@ pipeline {
           dockerImage = docker.build registry + ":$BUILD_NUMBER"
         }
       }
+    stage ('Scan') {
+      steps {
+        sh 'apk add bash curl'
+        sh 'curl -s https://ci-tools.anchore.io/inline_scan_latest | bash -s -- -d Dockerfile -b .anchore_policy.json ${IMAGE_NAME}:ci'
+      }
     }
+
     stage('Deploy Image') {
       steps{
         script {
