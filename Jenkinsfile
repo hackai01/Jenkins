@@ -1,6 +1,6 @@
 pipeline {
   environment {
-    imagename = "hackai87/jenkins"
+    imagename = "hackai87/jenkins01:latest"
     registryCredential = 'hackai87'
     dockerImage = ''
   }
