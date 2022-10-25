@@ -22,7 +22,7 @@ pipeline {
     stage('Deploy Image') {
       steps{
         script {
-          docker.withRegistry( '', registryCredential ) {
+          docker.withRegistry( 'https://hub.docker.com/repository/docker/hackai87/jenkins01', registryCredential ) {
             dockerImage.push("$BUILD_NUMBER")
              dockerImage.push('latest')
           }
