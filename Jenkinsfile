@@ -1,6 +1,6 @@
 pipeline {
   environment {
-    imagename = "hackai87/jenkins01:latest"
+    registry = "hackai87/jenkins"
     registryCredential = 'hackai87'
     dockerImage = ''
   }
@@ -8,14 +8,14 @@ pipeline {
   stages {
     stage('Cloning Git') {
       steps {
-        git([url: 'https://github.com/hackai01/Jenkins', branch: 'main', credentialsId: 'hackai01'])
+        git 'https://github.com/hackai01/Jenkins'
  
       }
     }
     stage('Building image') {
       steps{
         script {
-          dockerImage = docker.build imagename
+          dockerImage = docker.build registry + ":$BUILD_NUMBER"
         }
       }
     }
