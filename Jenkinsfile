@@ -8,7 +8,7 @@ pipeline {
   stages {
     stage('Cloning Git') {
       steps {
-        git 'https://github.com/hackai01/Jenkins'
+        git ([url: 'https://github.com/hackai01/Jenkins', branch: 'main', credentialsId: 'hackai01'])
  
       }
     }
