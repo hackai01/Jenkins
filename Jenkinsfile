@@ -11,7 +11,7 @@ stages {
       git ([url: 'https://github.com/hackai01/Jenkins', branch: 'main', credentialsId: 'hackai01'])
     }
   }
-stage('Building our image') {
+stage('Building image') {
   steps{
     script {
       dockerImage = docker.build registry + ":$BUILD_NUMBER"
