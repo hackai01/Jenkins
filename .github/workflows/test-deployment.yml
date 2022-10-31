@@ -1,0 +1,128 @@
+name: Push to DockerHub & Scan for CIS Compliance
+
+on: [push]
+
+permissions: write-all
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: docker login
+      env:
+        DOCKERHUB_USERNAME: ${{secrets.DOCKERHUB_USERNAME}}
+        DOCKERHUB_PASSWORD: ${{secrets.DOCKERHUB_PASSWORD}}
+      run: |
+        docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag hackai87/pre_flight_check
+
+    - name: Docker Push
+      run: docker push ${{secrets.DOCKERHUB_USERNAME}}/pre_flight_check
+      
+
+  dockle:
+    name: Dockle Container Analysis
+    needs: push
+    runs-on: ubuntu-latest
+    steps:
+       # Makes sure your .dockleignore file is available to the next step
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Authenticate to DockHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Run Dockle
+      uses: erzz/dockle-action@v1
+      id: dockle-report
+      with:
+        image: ${{secrets.DOCKERHUB_USERNAME}}/pre_flight_check
+        report-format: sarif
+        report-name: dockle-report
+        failure-threshold: warn
+        exit-code: 0
+        accept-extensions: pem
+
+
+  anchore_scan_job:
+    runs-on: ubuntu-latest
+    needs: dockle
+    name: Anchore grype security scan
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - name: Scan current project
+      id: scan
+      uses: anchore/scan-action@v3
+      with:
+        path: "."
+        fail-build: false
+        acs-report-enable: true
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: build local container
+      uses: docker/build-push-action@v2
+      with:
+        tags: devops-counsel/anchore-demo:latest
+        push: false
+        load: true
+
+    - name: Scan image
+      uses: anchore/scan-action@v3
+      id: imagescan
+      with:
+        image: "devops-counsel/anchore-demo:latest"
+        acs-report-enable: "true"
+        fail-build: false
+
+    - name: upload Anchore Image scan SARIF report
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{ steps.scan.outputs.sarif }}
+
+  build:
+    needs: anchore_scan_job
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: check out source code
+      uses: actions/checkout@v2
+
+    - name: Build the Docker image
+      run: docker build -t ga63qes/dockerdeployment -f Dockerfile .
+
+    - name: Generate Deployment Package
+      run: zip -r deploy.zip *
+
+    - name: Get timestamp
+      uses: gerred/actions/current-time@master
+      id: current-time
+        
+    - name: Run string replace
+      uses: frabert/replace-string-action@master
+      id: format-time
+      with:
+        pattern: '[:\.]+'
+        string: "${{ steps.current-time.outputs.time }}"
+        replace-with: '-'
+        flags: 'g'
+
+    - name: Deploy to EB
+      uses: einaregilsson/beanstalk-deploy@v14
+      with:
+        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        application_name: Web-app2
+        environment_name: Web-app2-env-2
+        version_label: "Dockerdeployment-${{ steps.format-time.outputs.replaced }}"
+        region: us-east-1
+        deployment_package: deploy.zip
