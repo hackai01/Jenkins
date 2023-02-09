@@ -120,8 +120,8 @@ jobs:
       with:
         aws_access_key: ${{ secrets.ACCESS_KEY }}
         aws_secret_key: ${{ secrets.SECRET_ACCESS_KEY }}
-        application_name: WebAppDeployment
-        environment_name: Webappdeployment-env
+        application_name: Webapp1
+        environment_name: Webapp1-env
         version_label: "Dockerdeployment-${{ steps.format-time.outputs.replaced }}"
         region: us-east-1
         deployment_package: deploy.zip
