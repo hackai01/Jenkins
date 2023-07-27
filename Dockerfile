@@ -1,4 +1,4 @@
-FROM apline:latest
+FROM alpine:latest
 
 WORKDIR /usr/share/nginx/html
 
