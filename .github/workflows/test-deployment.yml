@@ -1,6 +1,7 @@
 name: Push to DockerHub & Scan for CIS Compliance
 
-on: [push]
+on:
+  workflow_dispatch:
 
 permissions: write-all
 
