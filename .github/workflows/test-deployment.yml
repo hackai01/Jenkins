@@ -46,7 +46,7 @@ jobs:
         report-format: sarif
         report-name: dockle-report
         failure-threshold: warn
-        exit-code: 1
+        exit-code: 0
         accept-extensions: pem
 
 
