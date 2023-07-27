@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM apline:latest
 
 WORKDIR /usr/share/nginx/html
 
