@@ -45,7 +45,7 @@ jobs:
         image: ${{secrets.DOCKERHUB_USERNAME}}/pre_flight_check
         report-format: sarif
         report-name: dockle-report
-        failure-threshold: warn
+        failure-threshold: high
         exit-code: 1
         accept-extensions: pem
 
